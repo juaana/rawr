@@ -1,0 +1,32 @@
+version: '3'
+services:
+  db:
+    image: postgres:16.3-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGPASSWORD=postgres
+    ports:
+      - "5432:5432"
+    stop_signal: SIGTERM
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  web:
+    build: .
+    command: /bin/sh -c "rm -f /app/tmp/pids/server.pid && bundle exec rails s -b 0.0.0.0"
+    volumes:
+      - bundle:/bundle
+      - cache:/cache
+      - .:/app
+    ports:
+      - '3000:3000'
+    environment:
+      - SPROCKETS_CACHE=/cache
+    tty: true
+    stdin_open: true
+    depends_on:
+      - db
+volumes:
+  bundle:
+  cache:
+  postgres-data:
